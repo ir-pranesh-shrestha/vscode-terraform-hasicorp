@@ -1,8 +1,6 @@
 name: HasiCorp x InvisiRisk 
 
 on:
-  schedule:
-    - cron: '50 2 * * *'  # Runs daily at 8:30 AM Nepal Time
   workflow_dispatch:
 
 permissions:
@@ -22,25 +20,12 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-
-      - name: Set up Git
-        run: |
-          git config user.name "ir-pranesh-shrestha"
-          git config user.email "pranesh.shrestha@invisirisk.com"
-          
-      - name: Add upstream and sync fork
-        run: |
-          git remote add upstream https://github.com/hashicorp/vscode-terraform.git
-          git fetch upstream
-          git checkout main
-          git merge upstream/main --no-edit
-          git push https://x-access-token:${{ secrets.MY_PAT }}@github.com/ir-pranesh-shrestha/vscode-terraform-hasicorp main
           
       - name: Setup PSE
         uses: invisirisk/pse-action@latest
         with:
-          api_url: "https://app.invisirisk.com"
-          app_token: ${{ secrets.IR_API_KEY_PROD }}
+          api_url: "https://app.dev.invisirisk.com"
+          app_token: ${{ secrets.IR_API_KEY_DEV }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
