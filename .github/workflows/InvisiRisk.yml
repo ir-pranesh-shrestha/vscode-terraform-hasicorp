@@ -2,7 +2,7 @@ name: HasiCorp x InvisiRisk
 
 on:
   schedule:
-    - cron: '50 2 * * *'  # Runs daily at 8:30 AM Nepal Time
+    - cron: '25 0 * * 1'  # every Monday at 12:25 AM UTC (6:10 AM NPT)
   workflow_dispatch:
 
 permissions:
