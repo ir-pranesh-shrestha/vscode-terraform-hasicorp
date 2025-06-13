@@ -35,4 +35,5 @@ jobs:
         uses: invisirisk/pse-action@test
         with:
           cleanup: "true"
+          debug: "true"
           # send_job_status: "true" # enables github workflow jobs information
