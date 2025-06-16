@@ -38,3 +38,16 @@ jobs:
           cleanup_step_name: "Cleanup PSE"
           debug: "true"
           # send_job_status: "true" # enables github workflow jobs information
+
+  gather_analytics:
+     runs-on: ubuntu-latest
+     name: Gather Analytics
+     needs: test
+     if: always()
+     steps:
+      - name: Gather Status
+        uses: invisirisk/pse-action@test
+        with:
+          api_url: "https://app.stage.invisirisk.com"
+          app_token: ${{ secrets.IR_API_KEY_STAGE }}
+          send_job_status: "true"
