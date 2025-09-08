@@ -36,6 +36,7 @@ import { TerraformCommands } from './commands/terraform';
 import * as lsStatus from './status/language';
 import { TerraformCloudFeature } from './features/terraformCloud';
 import { setupMockServer, stopMockServer } from './test/e2e/specs/mocks/server';
+import { McpServerFeature } from './features/mcpServer';
 
 const id = 'terraform';
 const brand = `HashiCorp Terraform`;
@@ -46,6 +47,7 @@ const documentSelector: DocumentSelector = [
   { scheme: 'file', language: 'terraform-deploy' },
   { scheme: 'file', language: 'terraform-test' },
   { scheme: 'file', language: 'terraform-mock' },
+  { scheme: 'file', language: 'terraform-search' },
 ];
 const outputChannel = vscode.window.createOutputChannel(brand);
 const tfcOutputChannel = vscode.window.createOutputChannel('HCP Terraform');
@@ -68,6 +70,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   context.subscriptions.push(new TerraformLSCommands(context));
 
   context.subscriptions.push(new TerraformCloudFeature(context, reporter, tfcOutputChannel));
+
+  // Register MCP server feature
+  context.subscriptions.push(new McpServerFeature(context, reporter, outputChannel));
 
   if (config('terraform').get<boolean>('languageServer.enable') === false) {
     reporter.sendTelemetryEvent('disabledTerraformLS');
@@ -94,6 +99,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         vscode.workspace.createFileSystemWatcher('**/*.tfdeploy.hcl'),
         vscode.workspace.createFileSystemWatcher('**/*.tftest.hcl'),
         vscode.workspace.createFileSystemWatcher('**/*.tfmock.hcl'),
+        vscode.workspace.createFileSystemWatcher('**/*.tfquery.hcl'),
       ],
     },
     diagnosticCollectionName: 'HashiCorpTerraform',
