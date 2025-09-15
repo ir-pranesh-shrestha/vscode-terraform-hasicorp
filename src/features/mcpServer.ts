@@ -7,7 +7,7 @@ import TelemetryReporter from '@vscode/extension-telemetry';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
-import which from 'which';
+import { config } from '../utils/vscode';
 
 const execAsync = promisify(exec);
 
@@ -56,7 +56,19 @@ export class McpServerFeature {
   private isMcpApiAvailable(): boolean {
     // Check if VS Code has the MCP API available
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return typeof (vscode as any).lm?.registerMcpServerDefinitionProvider === 'function';
+    const available = typeof (vscode as any).lm?.registerMcpServerDefinitionProvider === 'function';
+    if (!available) {
+      this.outputChannel.appendLine(`Terraform MCP API is not available in current VS Code version ${vscode.version}`);
+    }
+    return available;
+  }
+
+  private isMcpServerEnabled(): boolean {
+    const isEnabled = config('terraform').get<boolean>('mcp.server.enable') === true;
+    if (!isEnabled) {
+      this.outputChannel.appendLine('HashiCorp Terraform MCP Server integration is disabled by configuration');
+    }
+    return isEnabled;
   }
 
   private registerMcpServerProvider(): vscode.Disposable | undefined {
@@ -68,6 +80,9 @@ export class McpServerFeature {
         provideMcpServerDefinitions: () => {
           return this.provideMcpServerDefinitions();
         },
+        resolveMcpServerDefinition: (definition: McpServerDefinition) => {
+          return this.resolveMcpServerDefinition(definition);
+        },
       });
     } catch (error) {
       this.logError('Error registering MCP server provider', error);
@@ -75,10 +90,11 @@ export class McpServerFeature {
     }
   }
 
-  private async provideMcpServerDefinitions(): Promise<McpServerDefinition[]> {
+  // According to VS Code API docs, no user interaction should happen here
+  // Just provide the available MCP server definitions
+  private provideMcpServerDefinitions(): McpServerDefinition[] {
     try {
-      const dockerAvailable = await this.dockerValidations();
-      if (!dockerAvailable) {
+      if (!this.isMcpServerEnabled()) {
         return [];
       }
 
@@ -89,20 +105,31 @@ export class McpServerFeature {
         env: {},
       };
 
-      this.showMcpServerInfoMessage();
-
       return [server];
     } catch (error) {
       this.logError('Error providing MCP server definitions', error);
       return [];
     }
   }
+
+  // All user interactions should happen here
+  // Should return resolved server definition if server should be started
+  private async resolveMcpServerDefinition(definition: McpServerDefinition): Promise<McpServerDefinition> {
+    if (definition.label !== 'HashiCorp Terraform MCP Server') {
+      // Not our definition, return as is
+      return definition;
+    }
+
+    const dockerAvailable = await this.dockerValidations();
+    if (!dockerAvailable) {
+      throw new Error('Docker is required but not available or running');
+    }
+
+    return definition;
+  }
+
   private async dockerValidations(): Promise<boolean> {
     try {
-      if (!(await this.checkDockerAvailability())) {
-        return false;
-      }
-
       if (!(await this.checkDockerRunning())) {
         return false;
       }
@@ -114,25 +141,8 @@ export class McpServerFeature {
     }
   }
 
-  private async checkDockerAvailability(): Promise<boolean> {
-    try {
-      await which('docker');
-      return true;
-    } catch {
-      void vscode.window
-        .showWarningMessage(
-          'Docker is required to run the Terraform MCP Server. Please install Docker to use this feature.',
-          'Learn More',
-        )
-        .then((selection) => {
-          if (selection === 'Learn More') {
-            void vscode.env.openExternal(vscode.Uri.parse('https://docs.docker.com/get-docker/'));
-          }
-        });
-      return false;
-    }
-  }
-
+  // Check if container runtime is available and running
+  // The 'docker info' command validates both installation and daemon status
   private async checkDockerRunning(): Promise<boolean> {
     try {
       await execAsync('docker info', { timeout: 5000 });
@@ -140,10 +150,7 @@ export class McpServerFeature {
     } catch (error) {
       this.logError('Docker daemon check failed', error);
       void vscode.window
-        .showWarningMessage(
-          'Docker is installed but not running. Please start Docker to use the Terraform MCP Server.',
-          'Learn More',
-        )
+        .showWarningMessage('Please install and start a Docker compatible runtime to use this feature.', 'Learn More')
         .then((selection) => {
           if (selection === 'Learn More') {
             void vscode.env.openExternal(vscode.Uri.parse('https://docs.docker.com/get-started/'));
@@ -151,20 +158,6 @@ export class McpServerFeature {
         });
       return false;
     }
-  }
-
-  private showMcpServerInfoMessage(): void {
-    const message = 'Terraform MCP Server is now available for GitHub Copilot integration.';
-    const startAction = 'Start MCP Server';
-    const learnMoreAction = 'Learn More';
-
-    void vscode.window.showInformationMessage(message, startAction, learnMoreAction).then((selection) => {
-      if (selection === startAction) {
-        void vscode.commands.executeCommand('workbench.action.quickOpen', '>MCP: List Servers');
-      } else if (selection === learnMoreAction) {
-        void vscode.env.openExternal(vscode.Uri.parse('https://github.com/hashicorp/terraform-mcp-server'));
-      }
-    });
   }
 
   dispose(): void {

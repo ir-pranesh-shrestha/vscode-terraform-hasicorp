@@ -1,11 +1,26 @@
 # Changelog
 
+## 2.36.2 (2025-09-11)
+
+ENHANCEMENTS:
+
+* Configuration option `terraform.mcp.server.enable` to enable or disable HashiCorp Terraform MCP Server integration ([#2106](https://github.com/hashicorp/vscode-terraform/issues/2106))
+
+NOTES:
+
+* Added documentation for Terraform MCP Server integration ([#2107](https://github.com/hashicorp/vscode-terraform/issues/2107))
+
+## 2.36.1 (2025-09-09)
+
+ENHANCEMENTS:
+
+* Improve Terraform Configuration for MCP Server using resolveMcpServerDefinition. The documentation states that user interactions should happen in the resolveMcpServerDefinition function, so the Docker check is moved over here. The check just sees if the docker info command works. If it fails, it means Docker isn't installed or isn't running. ([#2102](https://github.com/hashicorp/vscode-terraform/issues/2102))
+
 ## 2.36.0 (2025-09-05)
 
 ENHANCEMENTS:
 
 * Terraform MCP Server deployment using Hashicorp VS Code extension ([#2086](https://github.com/hashicorp/vscode-terraform/issues/2086))
-
 
 ## 2.35.0 (2025-08-28)
 
