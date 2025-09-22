@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.37.0 (2025-09-19)
+
+NOTES:
+
+This release adds initial support for the Terraform Actions feature. This provides foundational language support for the new action block and the corresponding action_trigger lifecycle block.
+
+ENHANCEMENTS:
+
+* Added Support for Terraform Action Static Schema ([#2123](https://github.com/hashicorp/vscode-terraform/issues/2123))
+
+## 2.36.4 (2025-09-18)
+
+ENHANCEMENTS:
+
+* Added telemetry event start mcp server ([#2116](https://github.com/hashicorp/vscode-terraform/issues/2116))
+
+NOTES:
+
+* Updated documentation regarding default MCP server state. ([#2121](https://github.com/hashicorp/vscode-terraform/issues/2121))
+
+## 2.36.3 (2025-09-17)
+
+ENHANCEMENTS:
+
+* Changed default value for terraform.mcp.server.enable from true to false. ([#2113](https://github.com/hashicorp/vscode-terraform/issues/2113))
+
 ## 2.36.2 (2025-09-11)
 
 ENHANCEMENTS:
