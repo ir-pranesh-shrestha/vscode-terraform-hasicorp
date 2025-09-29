@@ -1,10 +1,28 @@
 # Changelog
 
+## 2.37.2 (2025-09-24)
+
+NOTES:
+
+* Added documentation for Terraform Search ([#2131](https://github.com/hashicorp/vscode-terraform/issues/2131))
+
+## 2.37.2025092217 (2024-09-22)
+
+NOTES:
+
+This is a release to bring the prerelease channel to parity with stable.
+
+## 2.37.1 (2025-09-22)
+
+INTERNAL:
+
+* Bump development-dependencies ([#2089](https://github.com/hashicorp/vscode-terraform/issues/2089))
+
 ## 2.37.0 (2025-09-19)
 
 NOTES:
 
-This release adds initial support for the Terraform Actions feature. This provides foundational language support for the new action block and the corresponding action_trigger lifecycle block.
+This release adds initial support for the new Actions feature in Terraform. This provides foundational language support for the new action block and the corresponding action_trigger lifecycle block.
 
 ENHANCEMENTS:
 
